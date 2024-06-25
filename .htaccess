@@ -1,0 +1,5 @@
+<IfModulemod_rewrite.c>
+    RewriteEngine On
+
+    RewriteRule ^(.*)$ src/$1 [L]
+</IfModule>
