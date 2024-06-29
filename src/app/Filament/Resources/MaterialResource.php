@@ -121,6 +121,7 @@ class MaterialResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('cost_per_unit')
                     ->label('Harga Satuan')
+                    ->formatStateUsing(fn ($state) => 'Rp' . number_format($state, 0, ',', '.'))
                     ->searchable(),
             ])
             ->filters([
