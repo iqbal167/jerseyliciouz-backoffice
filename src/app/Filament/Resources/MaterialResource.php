@@ -11,11 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Get;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\TextArea;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\TagsInput;
 use Filament\Support\RawJs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -26,28 +21,31 @@ class MaterialResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationLabel = 'Daftar Bahan Produksi';
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('name')
+                Forms\Components\TextInput::make('name')
                     ->label('Nama Bahan')
                     ->placeholder('Misal: MILANO,WAFEL,BRAZIL STANDARD')
                     ->required()
                     ->maxLength(255)
                     ->columnSpanFull(),
-                Textarea::make('description')
+                Forms\Components\Textarea::make('description')
                     ->label('Keterangan')
                     ->placeholder('Keterangan')
                     ->columnSpanFull(),
-                Select::make('category_id')
+                Forms\Components\Select::make('category_id')
+                    ->relationship('category', 'name')
                     ->label('Kategori')
                     ->placeholder('Pilih Kategori')
                     ->searchable()
                     ->preload()
                     ->required()
                     ->columnSpanFull(),
-                Toggle::make('is_textile')
+                Forms\Components\Toggle::make('is_textile')
                     ->label('Set Harga Untuk Bahan Konveksi')
                     ->reactive()
                     ->afterStateUpdated(
@@ -58,7 +56,7 @@ class MaterialResource extends Resource
                     )
                     ->onColor('info')
                     ->columnSpanFull(),
-                TextInput::make('cost_per_kg')
+                Forms\Components\TextInput::make('cost_per_kg')
                     ->label('Harga Per Kilogram')
                     ->placeholder('Masukan Harga Per Kilogram')
                     ->required()
@@ -71,7 +69,7 @@ class MaterialResource extends Resource
                         fn ($state, callable $set, callable $get) => $set('cost_per_unit', $state / number_format(($get('cost_ratio') ?: 1), 0, ',', ''))
                     )
                     ->columnSpanFull(),
-                TextInput::make('cost_ratio')
+                Forms\Components\TextInput::make('cost_ratio')
                     ->label('Rasio Konversi')
                     ->placeholder('Masukan Rasio Kg ke Satuan')
                     ->required()
@@ -86,7 +84,7 @@ class MaterialResource extends Resource
                         fn ($state, callable $set, callable $get) => $set('cost_per_unit', number_format(($get('cost_per_kg') ?: 1) / $state, 0, ',', ''))
                     )
                     ->columnSpanFull(),
-                TextInput::make('cost_per_unit')
+                Forms\Components\TextInput::make('cost_per_unit')
                     ->label('Harga Per Satuan')
                     ->placeholder('Masukan Harga Per Satuan')
                     ->required()
@@ -97,7 +95,7 @@ class MaterialResource extends Resource
                         fn (Get $get): bool => $get('is_textile') == true
                     )
                     ->columnSpanFull(),
-                TagsInput::make('tags')
+                Forms\Components\TagsInput::make('tags')
                     ->label('Tag')
                     ->splitKeys(['Tab', ''])
                     ->placeholder('Tambah Tag (Tekan Tab untuk tambah tag lainnya)')
@@ -115,7 +113,15 @@ class MaterialResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Nama Bahan')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Kategori')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('cost_per_unit')
+                    ->label('Harga Satuan')
+                    ->searchable(),
             ])
             ->filters([
                 //
