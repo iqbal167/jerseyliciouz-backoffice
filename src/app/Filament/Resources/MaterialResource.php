@@ -10,8 +10,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Get;
-use Filament\Support\RawJs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -59,10 +57,11 @@ class MaterialResource extends Resource
                 Forms\Components\TextInput::make('cost_per_kg')
                     ->label('Harga Per Kilogram')
                     ->placeholder('Masukan Harga Per Kilogram')
+                    ->prefix('Rp')
                     ->required()
                     ->step(1000)
                     ->hidden(
-                        fn (Get $get): bool => $get('is_textile') == false
+                        fn ($get): bool => $get('is_textile') == false
                     )
                     ->reactive()
                     ->afterStateUpdated(
@@ -73,26 +72,28 @@ class MaterialResource extends Resource
                     ->label('Rasio Konversi')
                     ->placeholder('Masukan Rasio Kg ke Satuan')
                     ->required()
-                    ->rules(['gt:0'])
                     ->step(0.01)
+                    ->numeric()
                     ->inputMode('decimal')
                     ->hidden(
-                        fn (Get $get): bool => $get('is_textile') == false
+                        fn ($get): bool => $get('is_textile') == false
                     )
                     ->reactive()
-                    ->afterStateUpdated(
-                        fn ($state, callable $set, callable $get) => $set('cost_per_unit', number_format(($get('cost_per_kg') ?: 1) / $state, 0, ',', ''))
-                    )
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        $cost_per_kg = $get('cost_per_kg') ?: 1;
+                        $cost_per_unit = $state != 0 ? number_format($cost_per_kg / $state, 0, ',', '') : '';
+                        $set('cost_per_unit', $cost_per_unit);
+                    })
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('cost_per_unit')
                     ->label('Harga Per Satuan')
                     ->placeholder('Masukan Harga Per Satuan')
+                    ->prefix('Rp')
                     ->required()
-                    ->mask(RawJs::make('$money($input)'))
-                    ->stripCharacters(',')
+                    ->formatStateUsing(fn ($state) =>  number_format($state, 0, '.', ''))
                     ->numeric()
                     ->readOnly(
-                        fn (Get $get): bool => $get('is_textile') == true
+                        fn ($get): bool => $get('is_textile') == true
                     )
                     ->columnSpanFull(),
                 Forms\Components\TagsInput::make('tags')
@@ -107,6 +108,16 @@ class MaterialResource extends Resource
                     ])
                     ->columnSpanFull(),
             ]);
+    }
+
+    public static function createForm(Form $form): Form
+    {
+        return self::form($form);
+    }
+
+    public static function editForm(Form $form): Form
+    {
+        return self::form($form);
     }
 
     public static function table(Table $table): Table
@@ -129,6 +140,7 @@ class MaterialResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
