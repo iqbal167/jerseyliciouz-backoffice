@@ -13,15 +13,20 @@ class EditMaterial extends EditRecord
 
     protected static ?string $title = 'Edit Data Bahan Produksi';
 
-    public function form(Form $form): Form
-    {
-        return MaterialResource::editForm($form);
-    }
-
     protected function getHeaderActions(): array
     {
         return [
             Actions\DeleteAction::make(),
         ];
+    }
+
+    public function form(Form $form): Form
+    {
+        return MaterialResource::editForm($form);
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }
