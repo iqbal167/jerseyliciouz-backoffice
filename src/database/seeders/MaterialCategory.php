@@ -21,6 +21,7 @@ class MaterialCategory extends Seeder
             'Lobang Kancing',
             'Kerah',
             'Tambahan',
+            'Polyflex/DTF',
             'Bordir',
         ];
 
