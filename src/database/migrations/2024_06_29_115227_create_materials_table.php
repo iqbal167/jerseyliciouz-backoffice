@@ -16,8 +16,9 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->unsignedBigInteger('category_id');
-            $table->decimal('cost_per_kg', 10, 2);
-            $table->decimal('cost_ratio', 5, 2);
+            $table->boolean('is_textile')->default(false);
+            $table->decimal('cost_per_kg', 10, 2)->nullable();
+            $table->decimal('cost_ratio', 5, 2)->nullable();
             $table->decimal('cost_per_unit', 10, 2);
             $table->json('tags')->nullable();
             $table->foreign('category_id')->references('id')->on('material_categories');
