@@ -13,6 +13,7 @@ class Material extends Model
         'name',
         'description',
         'category_id',
+        'is_textile',
         'cost_per_kg',
         'cost_ratio',
         'cost_per_unit',
